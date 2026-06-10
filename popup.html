@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>習格uploader</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Meiryo", "メイリオ", "Hiragino Kaku Gothic ProN", sans-serif;
+      background: #f7f8fa;
+      color: #333;
+      width: 380px;
+      font-size: 13px;
+    }
+
+    /* ヘッダー */
+    .header {
+      background: #2563d4;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-left { display: flex; align-items: center; gap: 8px; }
+    .logo {
+      width: 28px; height: 28px;
+      background: white; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px;
+    }
+    .header h1 { font-size: 13px; font-weight: bold; color: #fff; }
+    .header p { font-size: 10px; color: rgba(255,255,255,0.75); }
+    .settings-btn {
+      background: rgba(255,255,255,0.15); border: none;
+      border-radius: 4px; width: 26px; height: 26px;
+      cursor: pointer; color: #fff; font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .settings-btn:hover { background: rgba(255,255,255,0.25); }
+
+    /* アプリタブ */
+    .app-tabs-wrap {
+      background: #fff;
+      border-bottom: 2px solid #2563d4;
+      overflow-x: auto;
+      white-space: nowrap;
+      scrollbar-width: thin;
+    }
+    .app-tabs-wrap::-webkit-scrollbar { height: 3px; }
+    .app-tabs-wrap::-webkit-scrollbar-thumb { background: #c7d4f5; }
+
+    #appTabs {
+      display: inline-flex;
+      padding: 0 4px;
+    }
+
+    .app-tab {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 6px 10px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 11px;
+      color: #888;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s;
+      white-space: nowrap;
+    }
+    .app-tab .tab-icon { font-size: 16px; }
+    .app-tab .tab-name { font-size: 10px; }
+    .app-tab:hover { color: #2563d4; }
+    .app-tab.active {
+      color: #2563d4;
+      border-bottom-color: #2563d4;
+      font-weight: bold;
+    }
+
+    /* ビュー */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* 未設定 */
+    .not-configured { text-align: center; padding: 32px 20px; }
+    .not-configured .icon { font-size: 36px; margin-bottom: 12px; }
+    .not-configured p { color: #666; margin-bottom: 16px; line-height: 1.6; }
+
+    /* スクリーンショット */
+    .screenshot-area {
+      position: relative;
+      background: #e8eaf0;
+      border-bottom: 1px solid #dde0e8;
+    }
+    .screenshot-area img {
+      width: 100%; height: 140px;
+      object-fit: cover; display: block;
+    }
+    .screenshot-label {
+      position: absolute; top: 6px; left: 6px;
+      background: rgba(0,0,0,0.55); color: #fff;
+      font-size: 10px; padding: 2px 7px; border-radius: 3px;
+    }
+    .recapture-btn {
+      position: absolute; top: 6px; right: 6px;
+      background: rgba(0,0,0,0.55); border: none;
+      border-radius: 3px; color: #fff; font-size: 11px;
+      padding: 3px 8px; cursor: pointer; font-family: inherit;
+    }
+    .recapture-btn:hover { background: rgba(0,0,0,0.75); }
+
+    /* フォーム */
+    .form-body { padding: 10px 14px 14px; }
+
+    .app-badge {
+      background: #eef2ff; border: 1px solid #c7d4f5;
+      border-radius: 4px; padding: 5px 10px;
+      font-size: 12px; color: #2563d4;
+      margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    .field { margin-bottom: 9px; }
+    label { display: block; font-size: 11px; color: #555; margin-bottom: 3px; font-weight: bold; }
+    .required { color: #e03131; margin-left: 2px; }
+
+    input[type="date"], textarea, select {
+      width: 100%;
+      background: #fff;
+      border: 1px solid #c8ccd4;
+      border-radius: 4px;
+      padding: 6px 9px;
+      color: #333;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: #2563d4;
+      box-shadow: 0 0 0 2px rgba(37,99,212,0.12);
+    }
+    select { cursor: pointer; }
+    textarea { resize: vertical; min-height: 52px; line-height: 1.5; }
+
+    /* ボタン */
+    .btn-submit {
+      width: 100%; background: #2563d4;
+      border: none; border-radius: 4px;
+      padding: 9px; color: #fff;
+      font-size: 13px; font-weight: bold;
+      font-family: inherit; cursor: pointer;
+      margin-top: 4px;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: background 0.15s;
+    }
+    .btn-submit:hover { background: #1a4fbd; }
+    .btn-submit:active { background: #1340a0; }
+
+    .btn-secondary {
+      width: 100%; background: #fff;
+      border: 1px solid #c8ccd4; border-radius: 4px;
+      padding: 8px; color: #555; font-size: 13px;
+      font-family: inherit; cursor: pointer; margin-top: 6px;
+      transition: background 0.15s;
+    }
+    .btn-secondary:hover { background: #f2f4f8; }
+
+    /* 結果 */
+    .result-view { text-align: center; padding: 32px 20px; }
+    .result-icon { font-size: 40px; margin-bottom: 10px; }
+    .result-title { font-size: 16px; font-weight: bold; margin-bottom: 6px; }
+    .result-sub { font-size: 12px; color: #666; line-height: 1.7; }
+    .result-view.success .result-title { color: #2563d4; }
+    .result-view.error .result-title { color: #c92a2a; }
+
+    /* ローディング */
+    .loading-overlay {
+      position: fixed; inset: 0;
+      background: rgba(247,248,250,0.9);
+      display: none;
+      flex-direction: column; align-items: center; justify-content: center;
+      gap: 10px; z-index: 100;
+    }
+    .loading-overlay.show { display: flex; }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid #dde0e8;
+      border-top-color: #2563d4;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 13px; color: #666; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-left">
+      <div class="logo">📸</div>
+      <div>
+        <h1>習格uploader</h1>
+        <p>ver2.3</p>
+      </div>
+    </div>
+    <button class="settings-btn" id="settingsBtn" title="設定">⚙️</button>
+  </div>
+
+  <!-- アプリ選択タブ -->
+  <div class="app-tabs-wrap">
+    <div id="appTabs"></div>
+  </div>
+
+  <!-- 未設定 -->
+  <div class="view active" id="view-notConfigured">
+    <div class="not-configured">
+      <div class="icon">🔐</div>
+      <p>認証情報が設定されていません。<br>先に設定画面でログイン情報を入力してください。</p>
+      <button class="btn-submit" id="goSettingsBtn">設定を開く</button>
+    </div>
+  </div>
+
+  <!-- メインフォーム -->
+  <div class="view" id="view-form">
+    <div class="screenshot-area">
+      <img id="screenshotImg" src="" alt="スクリーンショット">
+      <span class="screenshot-label">現在のタブ</span>
+      <button class="recapture-btn" id="recaptureBtn">🔄 撮り直し</button>
+    </div>
+
+    <div class="form-body">
+      <div class="app-badge" id="appBadge">
+        <span>⚙️</span><span>職遂 / Work（アプリ #841）</span>
+      </div>
+
+      <div class="field">
+        <label>実施日 / Date <span class="required">*</span></label>
+        <input type="date" id="dateInput">
+      </div>
+
+      <div class="field">
+        <label id="topicLabel">職遂 / Work <span class="required">*</span></label>
+        <select id="workInput">
+          <option value="" disabled selected>選択してください</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>説明 / Explain</label>
+        <textarea id="explainInput" placeholder="作業内容の詳細（任意）"></textarea>
+      </div>
+
+      <button class="btn-submit" id="submitBtn">
+        <span>📤</span><span>キントーンに登録</span>
+      </button>
+      <button class="btn-secondary" id="cancelBtn">キャンセル</button>
+    </div>
+  </div>
+
+  <!-- 結果 -->
+  <div class="view" id="view-result">
+    <div class="result-view" id="resultContent">
+      <div class="result-icon" id="resultIcon"></div>
+      <div class="result-title" id="resultTitle"></div>
+      <div class="result-sub" id="resultSub"></div>
+      <button class="btn-submit" id="doneBtn" style="margin-top:20px;">閉じる</button>
+      <button class="btn-secondary" id="retryBtn" style="display:none;">再試行</button>
+    </div>
+  </div>
+
+  <!-- ローディング -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">処理中...</div>
+  </div>
+
+  <script src="apps.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

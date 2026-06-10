@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "習格uploader ver2.4",
+  "version": "2.4.0",
+  "description": "スクリーンショットをキントーン各アプリに自動登録",
+  "permissions": ["activeTab", "tabs", "storage", "scripting"],
+  "host_permissions": ["https://astecpaint.cybozu.com/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": { "service_worker": "background.js" },
+  "options_page": "options.html",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
