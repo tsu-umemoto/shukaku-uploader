@@ -121,7 +121,7 @@
     <div class="header">
       <div class="logo">📸</div>
       <div>
-        <h1>習格uploader ver2.4</h1>
+        <h1>習格uploader ver2.5</h1>
         <p>設定 / Settings</p>
       </div>
     </div>
@@ -151,6 +151,22 @@
       </div>
     </div>
 
+    <div class="card">
+      <div class="card-title">★ よく使う項目</div>
+      <div class="info-box" style="margin-bottom:14px;">
+        チェックした項目はポップアップのプルダウン先頭に「★ よく使う」として表示されます。<br>
+        ※ 選択肢の読み込みにはキントーンへのログインが必要な場合があります
+      </div>
+      <div class="field">
+        <label>アプリを選択</label>
+        <select id="favAppSelect" style="width:100%; border:1px solid #c8ccd4; border-radius:4px; padding:7px 10px; font-size:13px; font-family:inherit;"></select>
+      </div>
+      <div id="favOptions" style="max-height:240px; overflow-y:auto; border:1px solid #e8eaf0; border-radius:4px; padding:8px 10px; margin-bottom:10px;">
+        <span style="color:#888; font-size:12px;">アプリを選択してください</span>
+      </div>
+      <button class="btn-secondary" id="saveFavBtn">⭐ このアプリのお気に入りを保存</button>
+    </div>
+
     <button class="btn-primary" id="saveBtn">💾 設定を保存</button>
     <button class="btn-secondary" id="testBtn">🔗 接続テスト（要キントーンログイン済み）</button>
 
@@ -166,6 +182,7 @@
       </a>
     </div>
   </div>
+  <script src="apps.js"></script>
   <script src="options.js"></script>
 </body>
 </html>

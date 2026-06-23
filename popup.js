@@ -1,4 +1,4 @@
-// popup.js - v2.3 全アプリ対応
+// popup.js - v2.5 全アプリ対応 + クリップボード貼り付け
 
 let screenshotDataUrl = null;
 let currentAppId = 841; // デフォルト：職遂
@@ -96,13 +96,36 @@ async function switchApp(appId) {
     }
   }
 
+  // お気に入り（よく使う項目）を取得
+  const savedFav = await new Promise(r => chrome.storage.local.get(["favorites"], r));
+  const favs = (savedFav.favorites && savedFav.favorites[appId]) || [];
+  const validFavs = favs.filter(f => options.includes(f));
+
   select.innerHTML = '<option value="" disabled selected>選択してください</option>';
-  options.forEach(opt => {
+
+  const addOption = (parent, opt) => {
     const el = document.createElement("option");
     el.value = opt;
     el.textContent = opt;
-    select.appendChild(el);
-  });
+    parent.appendChild(el);
+  };
+
+  if (validFavs.length > 0) {
+    // ★ よく使う グループを先頭に
+    const favGroup = document.createElement("optgroup");
+    favGroup.label = "★ よく使う";
+    validFavs.forEach(opt => addOption(favGroup, opt));
+    select.appendChild(favGroup);
+
+    // すべて グループ
+    const allGroup = document.createElement("optgroup");
+    allGroup.label = "すべて";
+    options.forEach(opt => addOption(allGroup, opt));
+    select.appendChild(allGroup);
+  } else {
+    // お気に入り未設定時は従来通りフラット表示
+    options.forEach(opt => addOption(select, opt));
+  }
 }
 
 function showView(viewId) {
@@ -128,8 +151,42 @@ async function captureScreenshot() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     screenshotDataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, { format: "png", quality: 90 });
     document.getElementById("screenshotImg").src = screenshotDataUrl;
+    document.getElementById("screenshotLabel").textContent = "現在のタブ";
   } catch(e) {
     console.error("スクリーンショット取得失敗:", e);
+  }
+}
+
+// クリップボードから画像を貼り付け（Win+Shift+S 等でコピーした画像）
+async function pasteFromClipboard() {
+  try {
+    const items = await navigator.clipboard.read();
+    let imageBlob = null;
+    for (const item of items) {
+      const imageType = item.types.find(t => t.startsWith("image/"));
+      if (imageType) {
+        imageBlob = await item.getType(imageType);
+        break;
+      }
+    }
+    if (!imageBlob) {
+      alert("クリップボードに画像がありません。\nWin+Shift+S などで画像をコピーしてから再度お試しください。");
+      return;
+    }
+
+    // blob を dataURL に変換してプレビュー・登録に使用
+    screenshotDataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(imageBlob);
+    });
+
+    document.getElementById("screenshotImg").src = screenshotDataUrl;
+    document.getElementById("screenshotLabel").textContent = "クリップボード画像";
+  } catch(e) {
+    console.error("クリップボード読み取り失敗:", e);
+    alert("クリップボードの読み取りに失敗しました。\nブラウザの権限設定をご確認ください。");
   }
 }
 
@@ -259,6 +316,7 @@ async function register() {
 document.getElementById("settingsBtn").addEventListener("click", () => chrome.runtime.openOptionsPage());
 document.getElementById("goSettingsBtn")?.addEventListener("click", () => chrome.runtime.openOptionsPage());
 document.getElementById("recaptureBtn")?.addEventListener("click", captureScreenshot);
+document.getElementById("pasteBtn")?.addEventListener("click", pasteFromClipboard);
 document.getElementById("submitBtn")?.addEventListener("click", register);
 document.getElementById("cancelBtn")?.addEventListener("click", () => window.close());
 document.getElementById("doneBtn")?.addEventListener("click", () => window.close());

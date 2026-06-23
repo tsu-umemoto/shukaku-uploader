@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "習格uploader ver2.4",
-  "version": "2.4.0",
+  "name": "習格uploader ver2.5",
+  "version": "2.5.0",
   "description": "スクリーンショットをキントーン各アプリに自動登録",
-  "permissions": ["activeTab", "tabs", "storage", "scripting"],
+  "permissions": ["activeTab", "tabs", "storage", "scripting", "clipboardRead"],
   "host_permissions": ["https://astecpaint.cybozu.com/*"],
   "action": {
     "default_popup": "popup.html",
